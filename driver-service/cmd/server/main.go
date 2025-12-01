@@ -1,17 +1,23 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"driver-service/config"
+	"driver-service/internal/router"
+	"driver-service/pkg/database"
+	"log"
 )
 
 func main() {
-	r := gin.Default()
+	cfg := config.Load()
+	mongoDB, err := database.ConnectMongo(cfg.MongoURI, cfg.DBName)
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Selamun Hello",
-		})
-	})
+	if err != nil {
+		log.Fatal("MongoDB connection failed:", err)
+	}
+	defer mongoDB.Close()
 
-	r.Run(":8081")
+	r := router.SetupRouter(mongoDB)
+
+	log.Printf("Server started on %s", cfg.ServerPort)
+	r.Run(":" + cfg.ServerPort)
 }
