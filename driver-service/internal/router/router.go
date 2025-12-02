@@ -1,6 +1,9 @@
 package router
 
 import (
+	"driver-service/internal/handler"
+	"driver-service/internal/repository"
+	"driver-service/internal/service"
 	"driver-service/pkg/database"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +18,19 @@ func SetupRouter(mongoDB *database.MongoDB) *gin.Engine {
 			"service": "driver-service",
 		})
 	})
+
+	driverCollection := mongoDB.GetCollection("drivers")
+	driverRepo := repository.NewDriverRepository(driverCollection)
+	driverService := service.NewDriverService(driverRepo)
+	driverHandler := handler.NewDriverHandler(driverService)
+
+	api := r.Group("/api/v1")
+	{
+		drivers := api.Group("/drivers")
+		{
+			drivers.POST("", driverHandler.CreateDriver)
+		}
+	}
 
 	return r
 }

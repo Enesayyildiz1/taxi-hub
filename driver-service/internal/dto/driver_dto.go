@@ -10,3 +10,7 @@ type CreateDriverRequest struct {
 	Lat       float64 `json:"lat"`
 	Lon       float64 `json:"lon"`
 }
+
+type DriverResponse struct {
+	ID string `json:"id"`
+}
