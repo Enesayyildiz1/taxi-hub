@@ -16,6 +16,7 @@ type DriverRepository interface {
 	Create(ctx context.Context, driver *model.Driver) error
 	FindByID(ctx context.Context, id string) (*model.Driver, error)
 	FindAll(ctx context.Context, page, pageSize int) ([]*model.Driver, int64, error)
+	FindByTaxiType(ctx context.Context, taksiType string) ([]*model.Driver, error)
 	Update(ctx context.Context, id string, updates bson.M) error
 	Delete(ctx context.Context, id string) error
 }
@@ -55,33 +56,6 @@ func (r *driverRepository) FindByID(ctx context.Context, id string) (*model.Driv
 	}
 
 	return &driver, nil
-}
-
-func (r *driverRepository) FindAll(ctx context.Context, page, pageSize int) ([]*model.Driver, int64, error) {
-	skip := (page - 1) * pageSize
-
-	findOptions := options.Find()
-	findOptions.SetSkip(int64(skip))
-	findOptions.SetLimit(int64(pageSize))
-	findOptions.SetSort(bson.D{{Key: "createdAt", Value: -1}})
-
-	cursor, err := r.collection.Find(ctx, bson.M{}, findOptions)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer cursor.Close(ctx)
-
-	var drivers []*model.Driver
-	if err = cursor.All(ctx, &drivers); err != nil {
-		return nil, 0, err
-	}
-
-	total, err := r.collection.CountDocuments(ctx, bson.M{})
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return drivers, total, nil
 }
 
 func (r *driverRepository) Update(ctx context.Context, id string, updates bson.M) error {
@@ -125,4 +99,51 @@ func (r *driverRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (r *driverRepository) FindAll(ctx context.Context, page, pageSize int) ([]*model.Driver, int64, error) {
+	skip := (page - 1) * pageSize
+
+	findOptions := options.Find()
+	findOptions.SetSkip(int64(skip))
+	findOptions.SetLimit(int64(pageSize))
+	findOptions.SetSort(bson.D{{Key: "createdAt", Value: -1}})
+
+	cursor, err := r.collection.Find(ctx, bson.M{}, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	var drivers []*model.Driver
+	if err = cursor.All(ctx, &drivers); err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.collection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return drivers, total, nil
+}
+
+func (r *driverRepository) FindByTaxiType(ctx context.Context, taksiType string) ([]*model.Driver, error) {
+	filter := bson.M{}
+	if taksiType != "" {
+		filter["taksiType"] = taksiType
+	}
+
+	cursor, err := r.collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var drivers []*model.Driver
+	if err = cursor.All(ctx, &drivers); err != nil {
+		return nil, err
+	}
+
+	return drivers, nil
 }

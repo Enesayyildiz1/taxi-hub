@@ -121,3 +121,29 @@ func (h *DriverHandler) DeleteDriver(c *gin.Context) {
 		"message": "Driver deleted successfully",
 	})
 }
+
+func (h *DriverHandler) GetNearbyDrivers(c *gin.Context) {
+	var req dto.NearbyDriverRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid query parameters",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	drivers, err := h.service.GetNearbyDrivers(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get nearby drivers",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"count": len(drivers),
+		"data":  drivers,
+	})
+}

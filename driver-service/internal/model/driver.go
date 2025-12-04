@@ -11,7 +11,7 @@ type Driver struct {
 	FirstName string             `bson:"firstName"`
 	LastName  string             `bson:"lastName"`
 	Plate     string             `bson:"plate"`
-	TaxiType  string             `bson:"taxiType"`
+	TaxiType  string             `bson:"taksiType"`
 	CarBrand  string             `bson:"carBrand"`
 	CarModel  string             `bson:"carModel"`
 	Location  struct {

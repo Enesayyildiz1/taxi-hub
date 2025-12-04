@@ -5,8 +5,10 @@ import (
 	"driver-service/internal/dto"
 	"driver-service/internal/model"
 	"driver-service/internal/repository"
+	"driver-service/pkg/utils"
 	"fmt"
 	"math"
+	"sort"
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,6 +20,7 @@ type DriverService interface {
 	GetDrivers(ctx context.Context, page, pageSize int) (*dto.DriverListResponse, error)
 	UpdateDriver(ctx context.Context, id string, req *dto.UpdateDriverRequest) error
 	DeleteDriver(ctx context.Context, id string) error
+	GetNearbyDrivers(ctx context.Context, req *dto.NearbyDriverRequest) ([]*dto.NearbyDriverResponse, error)
 }
 
 type driverService struct {
@@ -165,4 +168,92 @@ func (s *driverService) modelToResponse(driver *model.Driver) *dto.DriverRespons
 
 func (s *driverService) validateDriver(req *dto.CreateDriverRequest) error {
 	return nil
+}
+
+func (s *driverService) GetNearbyDrivers(ctx context.Context, req *dto.NearbyDriverRequest) ([]*dto.NearbyDriverResponse, error) {
+	radius := req.RadiusKm
+	if radius == 0 {
+		radius = 6.0
+	}
+
+	if err := s.validateNearbyRequest(req); err != nil {
+		return nil, err
+	}
+
+	drivers, err := s.fetchDriversByType(ctx, req.TaxiType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch drivers: %w", err)
+	}
+
+	nearbyDrivers := s.filterAndCalculateDistances(drivers, req.Lat, req.Lon, radius)
+	s.sortByDistance(nearbyDrivers)
+
+	return nearbyDrivers, nil
+}
+
+func (s *driverService) validateNearbyRequest(req *dto.NearbyDriverRequest) error {
+	if req.Lat < 40.8 || req.Lat > 41.4 {
+		return fmt.Errorf("latitude must be within Istanbul bounds (40.8 - 41.4)")
+	}
+	if req.Lon < 28.5 || req.Lon > 29.5 {
+		return fmt.Errorf("longitude must be within Istanbul bounds (28.5 - 29.5)")
+	}
+
+	if req.RadiusKm < 0 || req.RadiusKm > 50 {
+		return fmt.Errorf("radius must be between 0 and 50 km")
+	}
+
+	return nil
+}
+
+func (s *driverService) fetchDriversByType(ctx context.Context, taksiType string) ([]*model.Driver, error) {
+	if taksiType != "" {
+		return s.repo.FindByTaxiType(ctx, taksiType)
+	}
+
+	drivers, _, err := s.repo.FindAll(ctx, 1, 1000)
+	return drivers, err
+}
+
+func (s *driverService) filterAndCalculateDistances(
+	drivers []*model.Driver,
+	centerLat, centerLon, radiusKm float64,
+) []*dto.NearbyDriverResponse {
+	nearbyDrivers := make([]*dto.NearbyDriverResponse, 0)
+
+	for _, driver := range drivers {
+		distance := utils.CalculateDistance(
+			centerLat,
+			centerLon,
+			driver.Location.Lat,
+			driver.Location.Lon,
+		)
+
+		if distance <= radiusKm {
+			nearbyDrivers = append(nearbyDrivers, &dto.NearbyDriverResponse{
+				ID:         driver.ID.Hex(),
+				FirstName:  driver.FirstName,
+				LastName:   driver.LastName,
+				Plate:      driver.Plate,
+				TaxiType:   driver.TaxiType,
+				CarBrand:   driver.CarBrand,
+				CarModel:   driver.CarModel,
+				DistanceKm: s.roundDistance(distance),
+				Lat:        driver.Location.Lat,
+				Lon:        driver.Location.Lon,
+			})
+		}
+	}
+
+	return nearbyDrivers
+}
+
+func (s *driverService) sortByDistance(drivers []*dto.NearbyDriverResponse) {
+	sort.Slice(drivers, func(i, j int) bool {
+		return drivers[i].DistanceKm < drivers[j].DistanceKm
+	})
+}
+
+func (s *driverService) roundDistance(distance float64) float64 {
+	return math.Round(distance*100) / 100
 }

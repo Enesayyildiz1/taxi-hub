@@ -30,6 +30,7 @@ func SetupRouter(mongoDB *database.MongoDB) *gin.Engine {
 		{
 			drivers.POST("", driverHandler.CreateDriver)
 			drivers.GET("", driverHandler.GetDrivers)
+			drivers.GET("/nearby", driverHandler.GetNearbyDrivers)
 			drivers.GET("/:id", driverHandler.GetDriver)
 			drivers.PUT("/:id", driverHandler.UpdateDriver)
 			drivers.DELETE("/:id", driverHandler.DeleteDriver)
