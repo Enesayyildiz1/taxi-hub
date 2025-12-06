@@ -15,6 +15,7 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	r := gin.New()
 
 	r.Use(gin.Recovery())
+	r.Use(middleware.ErrorLogger())
 	r.Use(middleware.RequestLogger())
 
 	rateLimiter := middleware.NewRateLimiter(cfg.RateLimitRPS, cfg.RateLimitRPS*2)

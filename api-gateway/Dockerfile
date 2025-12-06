@@ -15,6 +15,8 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
+RUN mkdir -p /root/logs
+
 COPY --from=builder /app/gateway .
 COPY --from=builder /app/.env* ./
 

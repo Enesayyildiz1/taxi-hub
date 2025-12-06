@@ -3,20 +3,21 @@ package main
 import (
 	"api-gateway/config"
 	"api-gateway/internal/router"
-	"log"
+	"api-gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	logger.Init()
 	cfg := config.Load()
 	gin.SetMode(cfg.GinMode)
 	r := router.SetupRouter(cfg)
 
-	log.Printf("API Gateway running on port %s", cfg.Port)
-	log.Printf("Forwarding to Driver Service: %s", cfg.DriverServiceURL)
+	logger.Log.WithField("port", cfg.Port).Info("API Gateway starting")
+	logger.Log.WithField("driver_service", cfg.DriverServiceURL).Info("Driver service URL configured")
 
 	if err := r.Run(":" + cfg.Port); err != nil {
-		log.Fatalf("Server failed: %v", err)
+		logger.Log.WithError(err).Fatal("Server failed to start")
 	}
 }
