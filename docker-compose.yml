@@ -38,6 +38,9 @@ services:
       API_KEY: "admin-api-key-12345"
       RATE_LIMIT_RPS: "10"
       GIN_MODE: "debug"
+      LOG_LEVEL: "info"
+      LOG_FORMAT: "json"
+      ENABLE_FILE_LOG: "true"
 
 volumes:
   mongo-data:

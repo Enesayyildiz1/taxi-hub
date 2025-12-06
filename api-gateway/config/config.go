@@ -15,6 +15,9 @@ type Config struct {
 	APIKey           string
 	RateLimitRPS     int
 	GinMode          string
+	LogLevel         string
+	LogFormat        string
+	EnableFileLog    string
 }
 
 func Load() *Config {
@@ -29,6 +32,9 @@ func Load() *Config {
 		APIKey:           getEnv("API_KEY", ""),
 		RateLimitRPS:     getEnvInt("RATE_LIMIT_RPS", 10),
 		GinMode:          getEnv("GIN_MODE", "debug"),
+		LogLevel:         getEnv("LOG_LEVEL", "info"),
+		LogFormat:        getEnv("LOG_FORMAT", "json"),
+		EnableFileLog:    getEnv("ENABLE_FILE_LOG", "true"),
 	}
 }
 
