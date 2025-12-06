@@ -32,15 +32,15 @@ type DriverListResponse struct {
 
 type DriverResponse struct {
 	ID        string  `json:"id"`
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Plate     string  `json:"plate"`
-	TaxiType  string  `json:"taksiType"`
-	CarBrand  string  `json:"carBrand"`
-	CarModel  string  `json:"carModel"`
-	Lat       float64 `json:"lat"`
-	Lon       float64 `json:"lon"`
-	CreatedAt string  `json:"createdAt"`
+	FirstName string  `json:"firstName,omitempty"`
+	LastName  string  `json:"lastName,omitempty"`
+	Plate     string  `json:"plate,omitempty"`
+	TaxiType  string  `json:"taksiType,omitempty"`
+	CarBrand  string  `json:"carBrand,omitempty"`
+	CarModel  string  `json:"carModel,omitempty"`
+	Lat       float64 `json:"lat,omitempty"`
+	Lon       float64 `json:"lon,omitempty"`
+	CreatedAt string  `json:"createdAt,omitempty"`
 }
 
 type NearbyDriverRequest struct {
