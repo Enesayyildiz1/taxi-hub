@@ -1,0 +1,532 @@
+basePath: /
+definitions:
+  handler.AdminStatsData:
+    properties:
+      active_users:
+        example: 50
+        type: integer
+      total_requests:
+        example: 1000
+        type: integer
+    type: object
+  handler.AdminStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handler.AdminStatsData'
+      message:
+        example: Admin stats
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  handler.CreateDriverRequest:
+    properties:
+      carBrand:
+        example: Toyota
+        type: string
+      carModel:
+        example: Corolla
+        type: string
+      firstName:
+        example: Ahmet
+        type: string
+      lastName:
+        example: Yılmaz
+        type: string
+      lat:
+        example: 41.0082
+        type: number
+      lon:
+        example: 28.9784
+        type: number
+      plate:
+        example: 34ABC123
+        type: string
+      taksiType:
+        enum:
+        - sari
+        - turuncu
+        - siyah
+        example: sari
+        type: string
+    required:
+    - carBrand
+    - carModel
+    - firstName
+    - lastName
+    - lat
+    - lon
+    - plate
+    - taksiType
+    type: object
+  handler.DriverInfo:
+    properties:
+      carBrand:
+        example: Toyota
+        type: string
+      carModel:
+        example: Corolla
+        type: string
+      createdAt:
+        example: "2024-12-06T15:30:00Z"
+        type: string
+      firstName:
+        example: Ahmet
+        type: string
+      id:
+        example: 675abc123def456
+        type: string
+      lastName:
+        example: Yılmaz
+        type: string
+      lat:
+        example: 41.0082
+        type: number
+      lon:
+        example: 28.9784
+        type: number
+      plate:
+        example: 34ABC123
+        type: string
+      taksiType:
+        example: sari
+        type: string
+    type: object
+  handler.DriverListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handler.DriverInfo'
+        type: array
+      page:
+        example: 1
+        type: integer
+      pageSize:
+        example: 20
+        type: integer
+      total:
+        example: 42
+        type: integer
+      totalPages:
+        example: 3
+        type: integer
+    type: object
+  handler.DriverResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handler.DriverInfo'
+      message:
+        example: Driver created successfully
+        type: string
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        example: Error message
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  handler.HealthResponse:
+    properties:
+      service:
+        example: api-gateway
+        type: string
+      status:
+        example: ok
+        type: string
+    type: object
+  handler.LoginData:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      type:
+        example: Bearer
+        type: string
+    type: object
+  handler.LoginRequest:
+    properties:
+      password:
+        example: password
+        type: string
+      username:
+        example: admin
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  handler.LoginResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handler.LoginData'
+      message:
+        example: Login successful
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  handler.NearbyDriverInfo:
+    properties:
+      distanceKm:
+        example: 1.23
+        type: number
+      firstName:
+        example: Mehmet
+        type: string
+      id:
+        example: 675abc123
+        type: string
+      lastName:
+        example: Kaya
+        type: string
+      plate:
+        example: 34XYZ789
+        type: string
+    type: object
+  handler.NearbyDriversResponse:
+    properties:
+      count:
+        example: 5
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/handler.NearbyDriverInfo'
+        type: array
+    type: object
+  handler.SingleDriverResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handler.DriverInfo'
+    type: object
+  handler.SuccessResponse:
+    properties:
+      message:
+        example: Operation successful
+        type: string
+    type: object
+  handler.UpdateDriverRequest:
+    properties:
+      firstName:
+        example: Ahmet Ali
+        type: string
+      lastName:
+        example: Yılmaz
+        type: string
+      lat:
+        example: 41.01
+        type: number
+      lon:
+        example: 28.98
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: ayyildiz_enes66@hotmail.com
+    name: API Support
+    url: https://www.github.com/enesayyildiz1
+  description: API Gateway for Taxi Hub microservices
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Taxi Hub API Gateway
+  version: "1.0"
+paths:
+  /api/v1/admin/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed statistics about API usage (Admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.AdminStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Get system statistics
+      tags:
+      - Admin
+  /api/v1/drivers:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of all drivers
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DriverListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List all drivers
+      tags:
+      - Drivers
+    post:
+      consumes:
+      - application/json
+      description: Register a new taxi driver in the system
+      parameters:
+      - description: Driver data
+        in: body
+        name: driver
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateDriverRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.DriverResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new driver
+      tags:
+      - Drivers
+  /api/v1/drivers/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a driver from the system
+      parameters:
+      - description: Driver ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete driver
+      tags:
+      - Drivers
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific driver
+      parameters:
+      - description: Driver ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SingleDriverResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get driver by ID
+      tags:
+      - Drivers
+    put:
+      consumes:
+      - application/json
+      description: Update driver information
+      parameters:
+      - description: Driver ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated driver data
+        in: body
+        name: driver
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateDriverRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update driver
+      tags:
+      - Drivers
+  /api/v1/drivers/nearby:
+    get:
+      consumes:
+      - application/json
+      description: Find drivers within specified radius using GPS coordinates
+      parameters:
+      - description: Latitude
+        example: 41.0082
+        in: query
+        name: lat
+        required: true
+        type: number
+      - description: Longitude
+        example: 28.9784
+        in: query
+        name: lon
+        required: true
+        type: number
+      - description: Taxi type
+        enum:
+        - sari
+        - turuncu
+        - siyah
+        in: query
+        name: taksiType
+        type: string
+      - default: 6
+        description: Radius in km
+        in: query
+        name: radius
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.NearbyDriversResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get nearby drivers
+      tags:
+      - Drivers
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and get JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: User login
+      tags:
+      - Auth
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API Gateway is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.HealthResponse'
+      summary: Health check
+      tags:
+      - System
+securityDefinitions:
+  ApiKeyAuth:
+    description: API Key for admin endpoints
+    in: header
+    name: X-API-Key
+    type: apiKey
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
