@@ -46,21 +46,20 @@ Yeni sürücü ekler.
 **Request:**
 ```json
 {
-  "name": "Ali Veli",
-  "location": {
-    "lat": 41.015137,
-    "lng": 28.979530
-  },
-  "car": "Renault Clio"
+  "firstName": "Mehmet",
+  "lastName": "Kaya",
+  "plate": "34XYZ789",
+  "taksiType": "turuncu",
+  "carBrand": "Honda",
+  "carModel": "Civic",
+  "lat": 41.0082,
+  "lon": 28.9784
 }
 ```
 **Response:**
 ```json
 {
   "id": "driver_id",
-  "name": "Ali Veli",
-  "location": {...},
-  "car": "Renault Clio"
 }
 ```
 
@@ -71,10 +70,16 @@ Tüm sürücüleri listeler.
 ```json
 [
   {
-    "id": "driver_id",
-    "name": "Ali Veli",
-    "location": {...},
-    "car": "Renault Clio"
+    "id": "6934112a0a3d041839246dcf",
+    "firstName": "Mehmet",
+    "lastName": "Kaya",
+    "plate": "34XYZ789",
+    "taksiType": "turuncu",
+    "carBrand": "Honda",
+    "carModel": "Civic",
+    "lat": 41.0082,
+    "lon": 28.9784,
+    "createdAt": "2025-12-06T11:19:06Z"
   },
   ...
 ]
@@ -89,21 +94,24 @@ Sürücü bilgilerini günceller.
 #### `DELETE /api/v1/drivers/{id}`
 Sürücüyü siler.
 
-#### `GET /api/v1/drivers/nearby?lat={LAT}&lng={LNG}&radius={RADIUS}`
+#### `GET /api/v1/drivers/nearby?lat=41.0082&lon=28.9784&taksiType=sari`
 Belirtilen konuma yakın sürücüleri listeler.
 
-**Örnek:**
-```
-GET /api/v1/drivers/nearby?lat=41.015137&lng=28.979530&radius=5
-```
 **Response:**
 ```json
 [
   {
-    "id": "driver_id",
-    "name": "Ali Veli",
-    "distance": 1.2
-  },
+    "id": "6931d559734d982a29d7ef99",
+    "firstName": "Efe2",
+    "lastName": "Ayyildiz",
+    "plate": "34FFJ850",
+    "taksiType": "sari",
+    "carBrand": "Fiat",
+    "carModel": "Egea",
+    "distanceKm": 0,
+    "lat": 41.0082,
+    "lon": 28.9784
+  }
   ...
 ]
 ```
@@ -123,9 +131,8 @@ x-api-key: YOUR_KEY
 **Response:**
 ```json
 {
-  "totalDrivers": 120,
-  "activeDrivers": 80,
-  "totalRequests": 5000
+  "total_requests": 1000,
+  "active_users": 50
 }
 ```
 
